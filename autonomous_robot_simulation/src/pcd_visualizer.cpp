@@ -1,0 +1,74 @@
+/*
+@description:
+This code is a easy helper node to load a PCD file and publish it as a PointCloud2 message 
+on the /map topic for visualization in RViz.
+It reads the PCD file path from a ROS2 parameter named "map_file_path".
+*/
+
+#include <chrono>
+#include <functional>
+#include <memory>
+#include <stdexcept>
+#include <string>
+
+#include <pcl/common/io.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_types.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl/filters/voxel_grid.h>
+
+#include "rclcpp/rclcpp.hpp"
+#include "sensor_msgs/msg/point_cloud2.hpp"
+#include "sensor_msgs/msg/point_field.hpp"
+
+using namespace std::chrono_literals;
+
+class PcdtoPointcloud2 : public rclcpp::Node
+{
+public:
+  PcdtoPointcloud2(): Node("pcd_to_ros"){
+
+    this->declare_parameter("map_file_path", std::string("PCD/test.pcd"));
+    this->get_parameter("map_file_path", map_file_path);
+
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_(new pcl::PointCloud<pcl::PointXYZI>);
+    if (pcl::io::loadPCDFile<pcl::PointXYZI>(map_file_path, *cloud_) < 0) {
+      throw std::runtime_error("Could not load PCD map: " + map_file_path);
+    }
+
+    pcl::toROSMsg(*cloud_.get(), ros_pc2_);
+    publisher_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/map", 10);
+    timer_ = this->create_wall_timer(5000ms, std::bind(&PcdtoPointcloud2::timer_callback, this));
+    std::cout << "size: " << ros_pc2_.width * ros_pc2_.height << std::endl;
+    ros_pc2_.header.frame_id = "map";
+  }
+
+private:
+  void timer_callback()
+  {
+    if (publisher_->get_subscription_count() > 0 && m_first)
+    {
+      std::cout << "get_subscription_count:    " << publisher_->get_subscription_count() << std::endl;
+      ros_pc2_.header.stamp = this->get_clock()->now();
+      publisher_->publish(ros_pc2_);
+      m_first = false;
+    }
+  }
+  bool m_first{true};
+  sensor_msgs::msg::PointCloud2 ros_pc2_;
+  rclcpp::TimerBase::SharedPtr timer_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr publisher_;
+  std::string map_file_path = "none";
+};
+
+int main(int argc, char *argv[])
+{
+  rclcpp::init(argc, argv);
+  try {
+    rclcpp::spin(std::make_shared<PcdtoPointcloud2>());
+  } catch (const std::exception & ex) {
+    RCLCPP_FATAL(rclcpp::get_logger("pcd_visualizer"), "%s", ex.what());
+  }
+  rclcpp::shutdown();
+  return 0;
+}

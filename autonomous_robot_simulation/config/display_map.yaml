@@ -1,0 +1,3 @@
+pcd_to_ros:
+  ros__parameters:
+    map_file_path: package://fast_lio/PCD/test.pcd

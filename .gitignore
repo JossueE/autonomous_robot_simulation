@@ -1,0 +1,11 @@
+.vscode
+.codex
+build
+install
+log
+Log/*.png
+Log/*.txt
+Log/*.csv
+Log/*.pdf
+.vscode/c_cpp_properties.json
+.vscode/settings.json
