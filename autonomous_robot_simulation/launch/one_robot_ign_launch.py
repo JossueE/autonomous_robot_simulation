@@ -6,6 +6,7 @@ import yaml
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction, SetEnvironmentVariable, TimerAction
+from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
@@ -59,6 +60,7 @@ def launch_setup(context, *args, **kwargs):
     )
     cfg = load_launch_parameters(config_path, 'one_robot_ign_launch')
     use_sim_time = LaunchConfiguration('use_sim_time')
+    rviz = LaunchConfiguration('rviz')
 
     robot_model = get_launch_param(cfg, 'simulation', 'robot_model', 'ackermann')
     robot_ns = get_launch_param(cfg, 'simulation', 'robot_ns', 'r1')
@@ -104,6 +106,7 @@ def launch_setup(context, *args, **kwargs):
         output='screen',
         arguments=['-d', str(this_pkg_path + "/rviz/simulation.rviz")],
         parameters=[{'use_sim_time': use_sim_time}],
+        condition=IfCondition(rviz),
     )
 
     open_ign = IncludeLaunchDescription(
@@ -272,9 +275,15 @@ def generate_launch_description():
         default_value='true',
         description='Use simulation (Gazebo) clock if true',
     )
+    rviz = DeclareLaunchArgument(
+        'rviz',
+        default_value='true',
+        description='Launch RViz if true',
+    )
 
     return LaunchDescription([
         simulation_params_file,
         simu_time,
+        rviz,
         OpaqueFunction(function=launch_setup),
     ])

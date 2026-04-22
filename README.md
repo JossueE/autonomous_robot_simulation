@@ -360,7 +360,6 @@ You can tune **pose**, **FOV**, **resolution**, **rate**, **range** and the **to
 ```yaml
     lidar:
     lidar_frequency: 10.0              # Lidar frequency in Hz (typical value: 10 Hz)
-    period: 0.1                        # Scanning period in seconds
     lidar_out_topic: '/lidar/points'   # Output topic for published point clouds
 
     horizontal_samples: 360            # Number of horizontal scan samples per rotation
@@ -406,8 +405,6 @@ imu:
 FAST_LIO in this bundle consumes standard `sensor_msgs/msg/PointCloud2` plus IMU topics.
 Create or edit a sensor-specific config file in `fast_lio_ros2/config/`, for example `simulated.yaml`, and reference it from your launch.
 
-Each package in this workspace now owns its own configuration directory.
-Edit FAST_LIO directly in `fast_lio_ros2/config/simulated.yaml`; it is no longer mirrored under `autonomous_robot_simulation/config/`.
 > [!IMPORTANT]
 > Wherever you see comments like `# <----------------- HERE ... ----------------->`, copy the **exact values** you already defined in your repo’s config:
 > - `common.lid_topic` ← your `lidar_out_topic`
@@ -495,13 +492,6 @@ In other words:
 > You need to configure `extrinsic_T` and `extrinsic_R` according to the **actual relative pose** between your IMU and LiDAR in **your** robot, not by copying the values from my configuration.  
 They should be consistent with your URDF/SDF model and your TF tree.
 
-Then go to `fast_lio/launch/mapping.launch.py` and modify this function:
-
-```python
-decalre_config_file_cmd = DeclareLaunchArgument(
-    'config_file', default_value='simulated.yaml', # <----------------- HERE YOU PUT EXACTLY THE Same that you put in your .yaml DEFINED BEFORE ----------------->
-    description='Config file'
-)
 ```
 > [!NOTE]
 > This step is optional — you can also specify the `config_file` directly in the launch command (see the **Launch** section below).
@@ -704,9 +694,12 @@ map_file_path: "package://fast_lio/PCD/test.pcd"
 
 First you have to run the [**Launching the Robot in Gazebo**](https://github.com/JossueE/autonomous_robot_simulation?tab=readme-ov-file#launching-the-robot-in-gazebo) exactly as we defined in the previous section Mapping. 
 
-> [!NOTE]
-> Once the simulation is running, you can close the default RViz2 window that starts with the launcher if you prefer to use a custom RViz2 configuration.
-
+For localization, you can start the simulation without the default RViz2 window:
+```bash
+cd ~/colcon_ws
+source install/setup.bash
+ros2 launch autonomous_robot_simulation one_robot_ign_launch.py rviz:=false
+```
 Start RViz2 with the Localization Configuration
 
 In a new terminal:

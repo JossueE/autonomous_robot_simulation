@@ -9,7 +9,6 @@ one_robot_ign_launch:
 
     lidar:
       lidar_frequency: 10.0
-      period: 0.1
       lidar_out_topic: /lidar/points
       lidar_frame_id: lidar_link
       horizontal_samples: 360
