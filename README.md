@@ -2,10 +2,10 @@
 # Autonomous-Car-Simulation (ROS 2 + Gazebo) 🏎️
 **Author:** Jossue Espinoza <br>
 
-[![ROS 2](https://img.shields.io/badge/ROS%202-Humble-blue.svg)](https://docs.ros.org/en/humble/)
-[![Gazebo](https://img.shields.io/badge/Ignition-Gazebo-orange.svg)](https://gazebosim.org/home)
+[![ROS 2](https://img.shields.io/badge/ROS%202-Jazzy-blue.svg)](https://docs.ros.org/en/jazzy/)
+[![Gazebo](https://img.shields.io/badge/Gazebo-Harmonic-orange.svg)](https://gazebosim.org/docs/harmonic/)
 [![SLAM](https://img.shields.io/badge/SLAM-Integration-brightgreen.svg)](https://github.com/SteveMacenski/slam_toolbox)
-[![Python](https://img.shields.io/badge/Python-3.10+-yellow.svg)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/Python-3.12+-yellow.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ---
@@ -32,9 +32,6 @@ Within this repository, you’ll find everything needed to:
 
 ## 📚 Table of Contents
 - [Installation](#installation)
-    - [Pre-requisites and Gazebo installation for Jazzy](#pre-requisites-and-gazebo-installation-for-jazzy)
-    - [Bundled Packages](#bundled-packages)
-    - [Cloning this Repository](#cloning-this-repository)
 
 - [Configuration](#configuration)
     - [Configure The Simulation](#configure-the-simulation)
@@ -62,18 +59,18 @@ Within this repository, you’ll find everything needed to:
 ## Installation
 
 > [!IMPORTANT]
-> It is necessary to follow **all** the steps defined below, including:
-> - Pre-requisites  
-> - Gazebo installation for Jazzy
-> - Cloning this repository
-> - Building the bundled packages used for simulation, mapping, localization, and planning
+> Use the automatic installer. This README no longer documents a separate manual installation flow.
 
 ### Automatic installer for Jazzy
 
-This repository includes an installer that automates the ROS 2 Jazzy setup documented below: APT dependencies, Fast-CDR/Fast-DDS runtime updates, and the bundled packages `fast_lio`, `ndt_omp_ros2`, `autonomous_robot_simulation`, `lidar_localization`, and `path_planning_dynamic`.
+This repository was validated on Ubuntu 24.04 with ROS 2 Jazzy and Gazebo Harmonic.
+
+Clone the repository inside the `src` directory of your workspace and run the installer:
 
 ```bash
-cd ~/colcon_ws/src/autonomous_robot_simulation
+cd ~/colcon_ws/src
+git clone https://github.com/JossueE/autonomous_robot_simulation.git
+cd autonomous_robot_simulation
 ./installer.sh
 ```
 
@@ -85,216 +82,15 @@ COLCON_WS=/path/to/colcon_ws ./installer.sh
 
 Use a clean terminal sourced only with `/opt/ros/jazzy/setup.bash` or with no ROS2 setup sourced. Do not mix this flow with `~/ros2_jazzy/install/setup.bash`.
 
-### Pre-requisites and Gazebo installation for Jazzy
+The installer does the following:
 
-This package was validated with ROS 2 Jazzy on Ubuntu 24.04 (Noble). To avoid possible errors, update your system and install the ROS 2 dependencies in one pass.
-
-> [!IMPORTANT]
-> Do not place `#` comments inside an `apt-get install ... \` continuation block. Bash treats the comment as the end of the command, and the following package names are executed as separate commands.
-> Also avoid broad package globs such as `ros-jazzy-tf2-*`, `ros-jazzy-pcl-*`, and `ros-jazzy-gazebo-*`; they can install debug/extra packages or fail when a pattern does not match the Jazzy package set.
-
-```bash
-sudo apt-get update
-
-ros_jazzy_packages=(
-  # Build and Python helpers
-  ros-jazzy-ament-cmake-python
-  ros-jazzy-ament-index-python
-
-  # Core ROS / messages
-  ros-jazzy-rclcpp
-  ros-jazzy-rclcpp-lifecycle
-  ros-jazzy-std-msgs
-  ros-jazzy-sensor-msgs
-  ros-jazzy-geometry-msgs
-  ros-jazzy-visualization-msgs
-  ros-jazzy-nav-msgs
-  ros-jazzy-lifecycle-msgs
-  ros-jazzy-vision-msgs
-  ros-jazzy-image-geometry
-  ros-jazzy-message-filters
-  ros-jazzy-polygon-msgs
-
-  # Launch / URDF / robot state
-  ros-jazzy-launch
-  ros-jazzy-launch-ros
-  ros-jazzy-ros2launch
-  ros-jazzy-joint-state-publisher
-  ros-jazzy-joint-state-publisher-gui
-  ros-jazzy-robot-state-publisher
-  ros-jazzy-xacro
-
-  # TF2
-  ros-jazzy-tf2
-  ros-jazzy-tf2-ros
-  ros-jazzy-tf2-geometry-msgs
-  ros-jazzy-tf2-sensor-msgs
-  ros-jazzy-tf2-eigen
-  ros-jazzy-tf2-tools
-
-  # Gazebo Sim / ROS-Gazebo bridge for Jazzy
-  ros-jazzy-ros-gz
-
-  # RViz
-  ros-jazzy-rviz2
-  ros-jazzy-rviz-default-plugins
-
-  # PCL / point clouds
-  ros-jazzy-pcl-ros
-  ros-jazzy-pcl-conversions
-  ros-jazzy-pcl-msgs
-
-  # Grid map / Lanelet2 utilities
-  ros-jazzy-grid-map-ros
-  ros-jazzy-grid-map-rviz-plugin
-  ros-jazzy-lanelet2-core
-  ros-jazzy-lanelet2-io
-  ros-jazzy-lanelet2-maps
-  ros-jazzy-lanelet2-projection
-  ros-jazzy-lanelet2-routing
-  ros-jazzy-lanelet2-traffic-rules
-  ros-jazzy-lanelet2-validation
-)
-
-sudo apt-get install -y "${ros_jazzy_packages[@]}" libpcl-dev libeigen3-dev python3-yaml
-```
-
-For Jazzy, `ros-jazzy-ros-gz` installs the Gazebo Sim integration used by the launch files, including `ros_gz_sim`, `ros_gz_bridge`, and image transport helpers.
-
-**Note:** _This is made only once for the whole workspace._
-
----
-
-### Bundled FAST_LIO Package
-
-`fast_lio` is already included in this repository under `fast_lio_ros2/`.
-You do not need to clone a separate FAST_LIO repository anymore.
-
-The upstream project is still useful as an algorithm reference:
-[FAST_LIO_ROS2](https://github.com/Ericsii/FAST_LIO_ROS2)
-
-> [!IMPORTANT]  
-> **Dependencies are mandatory for this algorithm to work properly.**  
-> Make sure the following libraries are installed before building:
-> 
-> - **PCL ≥ 1.8** — Follow the [PCL Installation Guide](https://pointclouds.org/downloads/#linux)  
-> - **Eigen ≥ 3.3.4** — Follow the [Eigen Installation Guide](http://eigen.tuxfamily.org/index.php?title=Main_Page)
-
-For Ubuntu 24.04 and ROS 2 Jazzy, install the PCL/Eigen packages used by this package:
-
-```bash
-sudo apt-get update
-sudo apt-get install -y \
-  libpcl-dev \
-  libeigen3-dev \
-  ros-$ROS_DISTRO-pcl-ros \
-  ros-$ROS_DISTRO-pcl-conversions \
-  ros-$ROS_DISTRO-pcl-msgs \
-  ros-$ROS_DISTRO-tf2-eigen
-```
-
-This follows the official PCL Linux recommendation to install PCL through the system package manager with `libpcl-dev`. Eigen is header-only, but this package uses Eigen through CMake, so `libeigen3-dev` is installed to provide the headers and `Eigen3Config.cmake`. For the CMake side, follow Eigen's official guide for `find_package(Eigen3 3.3 REQUIRED NO_MODULE)` and the imported target `Eigen3::Eigen`: https://eigen.tuxfamily.org/dox/TopicCMakeGuide.html
-
-Validate the installed versions and CMake package files:
-
-```bash
-dpkg-query -W -f='${Package} ${Version}\n' \
-  libpcl-dev \
-  libeigen3-dev \
-  ros-$ROS_DISTRO-pcl-ros \
-  ros-$ROS_DISTRO-pcl-conversions \
-  ros-$ROS_DISTRO-pcl-msgs \
-  ros-$ROS_DISTRO-tf2-eigen
-
-pkg-config --modversion pcl_common eigen3
-
-find /usr -path '*PCLConfig.cmake' -o -path '*Eigen3Config.cmake'
-```
-
-Expected result on Ubuntu 24.04 Noble:
-
-```text
-PCL:   1.14.0 or newer
-Eigen: 3.4.0 or newer
-PCLConfig.cmake:    /usr/lib/x86_64-linux-gnu/cmake/pcl/PCLConfig.cmake
-Eigen3Config.cmake: /usr/share/eigen3/cmake/Eigen3Config.cmake
-```
-
-The CMake configuration in this repository is wired to those packages like this:
-
-```cmake
-find_package(PCL REQUIRED COMPONENTS common io filters registration)
-find_package(Eigen3 3.3 REQUIRED NO_MODULE)
-
-target_link_libraries(<target>
-  Eigen3::Eigen
-  ${PCL_LIBRARIES}
-)
-```
-
-`PCL_INCLUDE_DIRS`, `PCL_LIBRARY_DIRS`, and `PCL_DEFINITIONS` are still used because PCL exports those variables through `PCLConfig.cmake`. `Eigen3::Eigen` is the official imported CMake target exported by Eigen and provides the `/usr/include/eigen3` include path.
-
-This repository follows a **bundled workspace architecture**.
-The packages that used to be cloned separately now live inside the same root folder:
-
-- `autonomous_robot_simulation/autonomous_robot_simulation`
-- `autonomous_robot_simulation/fast_lio_ros2`
-- `autonomous_robot_simulation/ndt_omp_ros2`
-- `autonomous_robot_simulation/lidar_localization`
-- `autonomous_robot_simulation/path_planning_dynamic`
-
-That means you only clone this repository once, and then build the packages you need from the same workspace.
-
-### Bundled Packages
-
-This repository already includes:
-
-- `fast_lio_ros2` for LiDAR-inertial mapping
-- `ndt_omp_ros2` for scan registration used by localization
-- `autonomous_robot_simulation` for Gazebo simulation, LiDAR/IMU synchronization, and map display
-- `lidar_localization` for lifecycle-based LiDAR localization against the saved map
-- `path_planning_dynamic` for Tree-A* path planning
-
-> [!NOTE]
-> The test HD map is included at `autonomous_robot_simulation/utils/depot_lanelet2_map.osm`.
-
-### Cloning this Repository
-
-Clone this repository inside the `src` directory of your ROS 2 workspace.
-Replace **`colcon_ws`** with the name of your own workspace folder.
-
-```bash
-cd ~/colcon_ws/src
-git clone https://github.com/JossueE/autonomous_robot_simulation.git
-cd ..
-```
-
-Build the bundled packages from the workspace root:
-
-```bash
-cd ~/colcon_ws
-
-colcon build --packages-select ndt_omp_ros2 --cmake-args -DCMAKE_BUILD_TYPE=Release
-source install/setup.bash
-
-colcon build --packages-select autonomous_robot_simulation --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
-source install/setup.bash
-
-colcon build --packages-select lidar_localization --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
-source install/setup.bash
-
-colcon build --packages-select fast_lio --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
-source install/setup.bash
-
-colcon build --packages-select path_planning_dynamic --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
-source install/setup.bash
-```
-
-> [!NOTE]
-> `fast_lio` keeps `ikd-Tree` as a bundled git submodule under `fast_lio_ros2/include/ikd-Tree`. If you cloned without submodules, run:
-> ```bash
-> git -C ~/colcon_ws/src/autonomous_robot_simulation/fast_lio_ros2 submodule update --init --recursive
-> ```
+- Installs the required ROS 2 Jazzy, Gazebo Harmonic, RViz, bridge, and build dependencies.
+- Installs `PCL` and `Eigen` using the system packages expected by this workspace: `libpcl-dev`, `libeigen3-dev`, `ros-jazzy-pcl-ros`, `ros-jazzy-pcl-conversions`, `ros-jazzy-pcl-msgs`, and `ros-jazzy-tf2-eigen`.
+- Installs CasADi for `nmpc_controller`.
+- Runs `rosdep` for the bundled packages.
+- Initializes the bundled `fast_lio` submodule `ikd-Tree` when needed.
+- Builds `ndt_omp_ros2`, `autonomous_robot_simulation`, `lidar_localization`, `fast_lio`, `path_planning_dynamic`, and `nmpc_controller`.
+- Validates the resulting installation and prints the next launch commands.
 
 ---
 
@@ -304,7 +100,7 @@ source install/setup.bash
 
 The `one_robot_ign_launch.py` file launches **Gazebo (Ignition)** using a predefined world and spawns the selected robot model automatically.
 
-Inside the repository, the simulation package keeps its launch configuration in `autonomous_robot_simulation/config/simulation.yaml`.  
+Inside the repository, the simulation package keeps its launch configuration in `autonomous_robot_simulation/config/config.yaml`.  
 This file contains adjustable parameters for the simulation, as well as configuration options for the LiDAR and IMU functionalities.
 
 > [!IMPORTANT]
@@ -351,7 +147,7 @@ world_file = '<your_world_name>.sdf'
 ### 📡 Configure your LiDAR (URDF/Xacro + Ignition)
 
 This repo mounts a LiDAR on `base_link` and spawns an Ignition (Gazebo) ray sensor.  
-You can tune **pose**, **FOV**, **resolution**, **rate**, **range** and the **topic** directly in `autonomous_robot_simulation/config/simulation.yaml`.
+You can tune **pose**, **FOV**, **resolution**, **rate**, **range** and the **topic** directly in `autonomous_robot_simulation/config/config.yaml`.
 
 > [!TIP]
 > Use **`gpu_lidar`** if you have GPU available (faster). Use **`lidar`** for CPU-only.
@@ -653,7 +449,7 @@ ros2 service call /map_save std_srvs/srv/Trigger "{}"
 Once your map has been saved, you can visualize the final result with:
 
 > [!IMPORTANT]
-> Make sure the path in `autonomous_robot_simulation/config/display_map.yaml` matches exactly the location where your map was saved.
+> Make sure the path in `autonomous_robot_simulation/config/config.yaml` matches exactly the location where your map was saved.
 > Be careful when mixing relative and absolute paths.
 > The default value uses `package://fast_lio/PCD/test.pcd`.
 
@@ -683,7 +479,7 @@ source /opt/ros/jazzy/setup.bash
 source ~/colcon_ws/install/setup.bash
 ```
 
-The map path in `autonomous_robot_simulation/config/display_map.yaml` may be absolute, package-based, or relative to the installed package share directory. The default test map is:
+The map path in `autonomous_robot_simulation/config/config.yaml` may be absolute, package-based, or relative to the installed package share directory. The default test map is:
 
 ```yaml
 map_file_path: "package://fast_lio/PCD/test.pcd"

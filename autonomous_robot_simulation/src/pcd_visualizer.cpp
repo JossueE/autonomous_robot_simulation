@@ -7,6 +7,7 @@ It reads the PCD file path from a ROS2 parameter named "map_file_path".
 
 #include <chrono>
 #include <functional>
+#include <fstream>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -31,9 +32,18 @@ public:
     this->declare_parameter("map_file_path", std::string("PCD/test.pcd"));
     this->get_parameter("map_file_path", map_file_path);
 
+    std::ifstream pcd_file(map_file_path);
+    if (!pcd_file.good()) {
+      throw std::runtime_error(
+              "PCD map file not found or not readable: " + map_file_path +
+              ". Check the 'map_file_path' parameter.");
+    }
+
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_(new pcl::PointCloud<pcl::PointXYZI>);
     if (pcl::io::loadPCDFile<pcl::PointXYZI>(map_file_path, *cloud_) < 0) {
-      throw std::runtime_error("Could not load PCD map: " + map_file_path);
+      throw std::runtime_error(
+              "Could not parse PCD map: " + map_file_path +
+              ". Check that the file is a valid PCD and matches the expected point type.");
     }
 
     pcl::toROSMsg(*cloud_.get(), ros_pc2_);

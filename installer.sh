@@ -12,6 +12,7 @@ FAST_LIO_DIR="${BUNDLE_DIR}/fast_lio_ros2"
 NDT_OMP_DIR="${BUNDLE_DIR}/ndt_omp_ros2"
 LIDAR_LOCALIZATION_DIR="${BUNDLE_DIR}/lidar_localization"
 PATH_PLANNING_DIR="${BUNDLE_DIR}/path_planning_dynamic"
+NMPC_CONTROLLER_DIR="${BUNDLE_DIR}/nmpc_controller"
 
 log() {
   printf '\n\033[1;34m[installer]\033[0m %s\n' "$*"
@@ -59,6 +60,12 @@ verify_bundle_layout() {
   [[ -d "${NDT_OMP_DIR}" ]] || die "Falta ${NDT_OMP_DIR}"
   [[ -d "${LIDAR_LOCALIZATION_DIR}" ]] || die "Falta ${LIDAR_LOCALIZATION_DIR}"
   [[ -d "${PATH_PLANNING_DIR}" ]] || die "Falta ${PATH_PLANNING_DIR}"
+  [[ -d "${NMPC_CONTROLLER_DIR}" ]] || die "Falta ${NMPC_CONTROLLER_DIR}"
+}
+
+casadi_installed() {
+  [[ -f "/usr/local/include/casadi/casadi.hpp" ]] || return 1
+  [[ -f "/usr/local/lib/libcasadi.so" || -f "/usr/local/lib64/libcasadi.so" || -f "/usr/lib/x86_64-linux-gnu/libcasadi.so" ]]
 }
 
 update_bundled_sources() {
@@ -69,6 +76,40 @@ update_bundled_sources() {
   fi
 
   [[ -f "${FAST_LIO_DIR}/include/ikd-Tree/ikd_Tree.h" ]] || die "Falta include/ikd-Tree/ikd_Tree.h. Inicializa los submodules de fast_lio_ros2."
+}
+
+install_casadi_if_needed() {
+  log "Verificando CasADi para nmpc_controller"
+
+  if casadi_installed; then
+    log "CasADi ya está instalado"
+    return
+  fi
+
+  local casadi_src_dir="/tmp/casadi"
+
+  if [[ -d "${casadi_src_dir}/.git" ]]; then
+    run git -C "${casadi_src_dir}" pull --ff-only
+  else
+    run git clone https://github.com/casadi/casadi.git "${casadi_src_dir}"
+  fi
+
+  run rm -rf "${casadi_src_dir}/build"
+  run cmake -S "${casadi_src_dir}" -B "${casadi_src_dir}/build" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr/local \
+    -DWITH_IPOPT=ON \
+    -DWITH_BUILD_IPOPT=ON \
+    -DWITH_BUILD_MUMPS=ON \
+    -DWITH_BUILD_REQUIRED=ON
+  run cmake --build "${casadi_src_dir}/build" -j"$(nproc)"
+  run sudo cmake --install "${casadi_src_dir}/build"
+
+  log "Registrando /usr/local/lib para el runtime de CasADi"
+  printf '/usr/local/lib\n' | sudo tee /etc/ld.so.conf.d/casadi.conf >/dev/null
+  run sudo ldconfig
+
+  casadi_installed || die "CasADi no quedó instalado correctamente en /usr/local"
 }
 
 install_apt_dependencies() {
@@ -129,8 +170,10 @@ install_apt_dependencies() {
   local system_packages=(
     build-essential
     cmake
+    gfortran
     git
     libeigen3-dev
+    liblapack-dev
     libopencv-dev
     libpcl-dev
     pkg-config
@@ -158,13 +201,13 @@ install_rosdeps_for_bundle() {
 
   run rosdep install \
     --rosdistro "${ROS_DISTRO}" \
-    --from-paths "${SIM_PACKAGE_DIR}" "${FAST_LIO_DIR}" "${NDT_OMP_DIR}" "${LIDAR_LOCALIZATION_DIR}" "${PATH_PLANNING_DIR}" \
+    --from-paths "${SIM_PACKAGE_DIR}" "${FAST_LIO_DIR}" "${NDT_OMP_DIR}" "${LIDAR_LOCALIZATION_DIR}" "${PATH_PLANNING_DIR}" "${NMPC_CONTROLLER_DIR}" \
     --ignore-src \
     -y
 }
 
 build_workspace_packages() {
-  log "Compilando ndt_omp_ros2, autonomous_robot_simulation, lidar_localization, fast_lio y path_planning_dynamic"
+  log "Compilando ndt_omp_ros2, autonomous_robot_simulation, lidar_localization, fast_lio, path_planning_dynamic y nmpc_controller"
   clean_ros_environment
   source_setup "/opt/ros/${ROS_DISTRO}/setup.bash"
 
@@ -200,6 +243,13 @@ build_workspace_packages() {
     cd "${WORKSPACE_DIR}"
     run colcon build --packages-select path_planning_dynamic --symlink-install --cmake-clean-cache --cmake-args -DCMAKE_BUILD_TYPE=Release
   )
+
+  source_setup "${WORKSPACE_DIR}/install/setup.bash"
+
+  (
+    cd "${WORKSPACE_DIR}"
+    run colcon build --packages-select nmpc_controller --symlink-install --cmake-clean-cache --cmake-args -DCMAKE_BUILD_TYPE=Release
+  )
 }
 
 validate_installation() {
@@ -214,15 +264,18 @@ validate_installation() {
   run ros2 pkg prefix lidar_localization
   run ros2 pkg prefix fast_lio
   run ros2 pkg prefix path_planning_dynamic
+  run ros2 pkg prefix nmpc_controller
+  casadi_installed || die "CasADi no está disponible para nmpc_controller"
 
   local depot_dir="${WORKSPACE_DIR}/install/autonomous_robot_simulation/share/autonomous_robot_simulation/models/Depot"
   [[ -f "${depot_dir}/model.config" ]] || die "Falta ${depot_dir}/model.config"
   [[ -f "${depot_dir}/model.sdf" ]] || die "Falta ${depot_dir}/model.sdf"
   [[ -f "${depot_dir}/meshes/Depot.dae" ]] || die "Falta ${depot_dir}/meshes/Depot.dae"
-  [[ -f "${WORKSPACE_DIR}/install/autonomous_robot_simulation/share/autonomous_robot_simulation/utils/test.pcd" ]] || die "Falta utils/test.pcd instalado"
   [[ -f "${WORKSPACE_DIR}/install/lidar_localization/share/lidar_localization/launch/lidar_localization_launch.py" ]] || die "Falta lidar_localization_launch.py instalado"
   [[ -f "${WORKSPACE_DIR}/install/fast_lio/share/fast_lio/config/simulated.yaml" ]] || die "Falta fast_lio/config/simulated.yaml instalado"
   [[ -f "${WORKSPACE_DIR}/install/path_planning_dynamic/share/path_planning_dynamic/config/params.yaml" ]] || die "Falta path_planning_dynamic/config/params.yaml instalado"
+  [[ -f "${WORKSPACE_DIR}/install/nmpc_controller/share/nmpc_controller/launch/sim_nmpc.launch.py" ]] || die "Falta nmpc_controller/launch/sim_nmpc.launch.py instalado"
+  [[ -f "${WORKSPACE_DIR}/install/nmpc_controller/share/nmpc_controller/config/sim_nmpc.yaml" ]] || die "Falta nmpc_controller/config/sim_nmpc.yaml instalado"
 
   if ! nm -D "/opt/ros/${ROS_DISTRO}/lib/libfastcdr.so.2" | c++filt | grep -q 'eprosima::fastcdr::Cdr::serialize(unsigned int)'; then
     warn "libfastcdr.so.2 no exporta Cdr::serialize(unsigned int). Si display_map_launch.py falla con undefined symbol, actualiza ros-${ROS_DISTRO}-fastcdr/fastrtps."
@@ -256,6 +309,10 @@ Para lanzar path planning:
 
   ros2 launch path_planning_dynamic planning.launch.py
 
+Para lanzar NMPC:
+
+  ros2 launch nmpc_controller sim_nmpc.launch.py
+
 Nota: no sources ~/ros2_jazzy/install/setup.bash en la misma terminal. Este instalador usa /opt/ros/${ROS_DISTRO}.
 EOF
 }
@@ -273,6 +330,7 @@ main() {
   require_command cmake
   require_command make
   require_command colcon
+  require_command ldconfig
   require_command rosdep
   require_command pkg-config
   require_command nm
@@ -281,6 +339,7 @@ main() {
   install_apt_dependencies
   init_rosdep_if_needed
   update_bundled_sources
+  install_casadi_if_needed
   install_rosdeps_for_bundle
   build_workspace_packages
   validate_installation

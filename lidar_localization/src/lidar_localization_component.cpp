@@ -5,6 +5,7 @@ This node let us robustly localize a LiDAR in a pre-built map using PCL registra
 
 #include <lidar_localization/lidar_localization_component.hpp>
 #include <chrono>
+#include <fstream>
 
 PCLLocalization::PCLLocalization(const rclcpp::NodeOptions & options)
 : rclcpp_lifecycle::LifecycleNode("lidar_localization", options),
@@ -96,17 +97,32 @@ CallbackReturn PCLLocalization::on_activate(const rclcpp_lifecycle::State &)
 
   if (use_pcd_map_) {
     pcl::PointCloud<pcl::PointXYZI>::Ptr map_cloud_ptr(new pcl::PointCloud<pcl::PointXYZI>);
+    std::ifstream map_file(map_path_);
+    if (!map_file.good()) {
+      RCLCPP_ERROR(
+        get_logger(),
+        "Map file not found or not readable: %s. Check the 'map_path' parameter when use_pcd_map is true.",
+        map_path_.c_str());
+      return CallbackReturn::FAILURE;
+    }
+
     // load a pcd or ply file
     if (map_path_.rfind(".pcd") != std::string::npos) {
       RCLCPP_INFO(get_logger(), "Loading pcd map from: %s", map_path_.c_str());
       if (pcl::io::loadPCDFile(map_path_, *map_cloud_ptr) == -1) {
-        RCLCPP_ERROR(get_logger(), "Failed to load pcd file: %s", map_path_.c_str());
+        RCLCPP_ERROR(
+          get_logger(),
+          "Could not parse PCD map: %s. Check that the file is a valid .pcd map.",
+          map_path_.c_str());
         return CallbackReturn::FAILURE;
       }
     } else if (map_path_.rfind(".ply") != std::string::npos) {
       RCLCPP_INFO(get_logger(), "Loading ply map from: %s", map_path_.c_str());
       if (pcl::io::loadPLYFile(map_path_, *map_cloud_ptr) == -1) {
-        RCLCPP_ERROR(get_logger(), "Failed to load ply file: %s", map_path_.c_str());
+        RCLCPP_ERROR(
+          get_logger(),
+          "Could not parse PLY map: %s. Check that the file is a valid .ply map.",
+          map_path_.c_str());
         return CallbackReturn::FAILURE;
       }
     } else {
