@@ -199,10 +199,10 @@ imu:
 
 ### ⚡ Configure FAST_LIO
 FAST_LIO in this bundle consumes standard `sensor_msgs/msg/PointCloud2` plus IMU topics.
-Create or edit a sensor-specific config file in `fast_lio_ros2/config/`, for example `simulated.yaml`, and reference it from your launch.
+The repository already includes a ready-to-edit config file at `fast_lio_ros2/config/simulated.yaml`, so you do not need to copy or paste a FAST_LIO config from somewhere else. Edit that bundled file, or create another config in the same folder only if you need a different sensor profile.
 
 > [!IMPORTANT]
-> Wherever you see comments like `# <----------------- HERE ... ----------------->`, copy the **exact values** you already defined in your repo’s config:
+> In `fast_lio_ros2/config/simulated.yaml`, make sure these values stay aligned with your simulation config:
 > - `common.lid_topic` ← your `lidar_out_topic`
 > - `common.imu_topic` ← your `imu_out_topic`
 > - `preprocess.scan_line` ← your `vertical_samples`
@@ -261,7 +261,6 @@ Create or edit a sensor-specific config file in `fast_lio_ros2/config/`, for exa
                                         # -1 : all frames will be saved in ONE pcd file, may lead to memory crash when having too much frames.
 ```
 
-
 > [!WARNING]
 > Make sure that:
 > - In your URDF/Xacro, the LiDAR pose relative to the IMU/base_link matches
@@ -288,10 +287,11 @@ In other words:
 > You need to configure `extrinsic_T` and `extrinsic_R` according to the **actual relative pose** between your IMU and LiDAR in **your** robot, not by copying the values from my configuration.  
 They should be consistent with your URDF/SDF model and your TF tree.
 
-```
+
 > [!NOTE]
 > This step is optional — you can also specify the `config_file` directly in the launch command (see the **Launch** section below).
 ---
+
 
 ### 🗺️ Configure Localization
 
