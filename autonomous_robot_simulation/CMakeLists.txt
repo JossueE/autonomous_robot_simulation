@@ -112,7 +112,6 @@ install(DIRECTORY
 install(DIRECTORY
   materials
   meshes
-  thumbnails
   DESTINATION share/${PROJECT_NAME}/models/Depot
 )
 

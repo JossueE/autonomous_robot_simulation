@@ -129,7 +129,7 @@ def generate_launch_description():
 
     # Esperar 3s antes de intentar crear la entidad para dar tiempo a que el mundo cargue
     gz_spawn_entity = TimerAction(
-        period=3.0,
+        period=7.0,
         actions=[gz_spawn_entity]
     )
 
@@ -153,15 +153,15 @@ def generate_launch_description():
 
             #LIDAR
             '/lidar@sensor_msgs/msg/LaserScan@gz.msgs.LaserScan',
-            '/lidar/points@sensor_msgs/msg/PointCloud2@ignition.msgs.PointCloudPacked',
+            '/lidar/points@sensor_msgs/msg/PointCloud2@gz.msgs.PointCloudPacked',
 
             #DEEP CAMERA
-            # '/depth_camera/points@sensor_msgs/msg/PointCloud2@ignition.msgs.PointCloudPacked',
-            # '/depth_camera/camera_info@sensor_msgs/msg/CameraInfo@ignition.msgs.CameraInfo',
-            # '/depth_camera/image@sensor_msgs/msg/Image@ignition.msgs.Image',
+            # '/depth_camera/points@sensor_msgs/msg/PointCloud2@gz.msgs.PointCloudPacked',
+            # '/depth_camera/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo',
+            # '/depth_camera/image@sensor_msgs/msg/Image@gz.msgs.Image',
 
             #IMU
-            '/imu@sensor_msgs/msg/Imu@ignition.msgs.IMU',
+            '/imu@sensor_msgs/msg/Imu@gz.msgs.IMU',
         ],
         parameters=[{'qos_overrides./model/'+robot_ns+'.subscriber.reliability': 'reliable'}],
         output='screen',

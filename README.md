@@ -576,8 +576,8 @@ Also, make sure `map_path` points to your `.osm` map file.
 >   2. **Load the previously saved map** and start the localization node  
 >   3. **Teleoperate the robot** again, now using the existing map for localization
 
-### 🗺️ Mapping
-#### 🎮 Launching the Robot in Gazebo
+
+### 🎮 Launching the Robot in Gazebo
 
 You can start the simulation with:
 
@@ -594,6 +594,29 @@ ros2 launch autonomous_robot_simulation one_robot_ign_launch.py
 > - The first launch may take longer while Gazebo/Ignition caches assets and loads world resources.
 > - RViz should display the converted LiDAR topic `/lidar/points_pcl` with **Reliability Policy: Best Effort**. The raw Gazebo topic `/lidar/points_ign` may use a Gazebo-scoped frame such as `r1/base_footprint/gpu_lidar`, which can produce TF errors in RViz.
 > - If you change the **LiDAR** or **IMU** topic names, update your RViz displays (reselect topics) so they match the new names.
+
+### 🕹️ Teleoperating the Robot
+
+To teleoperate both the **_differential_** and **_omnidirectional_** mobile robot, use the package node:
+
+```bash
+ros2 run autonomous_robot_simulation omni_teleop_keyboard.py
+```
+
+To publish a velocity from terminal:
+
+```bash
+ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.1, y: 0.1}, angular: {z: 0.3}}"
+```
+To publish a velocity directly on a **Ignition** Topic from terminal:
+
+```bash
+ign topic -t "/model/r1/cmd_vel" -m ignition.msgs.Twist -p "linear: {x: 0.5, y: 0.5}"
+```
+---
+
+
+### 🗺️ Mapping
 
 #### ⚡ Launching the SLAM (FAST_LIO Mapping)
 
@@ -614,26 +637,6 @@ RViz will open with the LiDAR map view. Any warnings or errors will appear in th
 > For algorithm background and the upstream project history, see the original FAST_LIO_ROS2 repository:
 > [https://github.com/Ericsii/FAST_LIO_ROS2](https://github.com/Ericsii/FAST_LIO_ROS2)
 
----
-
-#### 🕹️ Teleoperating the Robot
-
-To teleoperate both the **_differential_** and **_omnidirectional_** mobile robot, use the package node:
-
-```bash
-ros2 run autonomous_robot_simulation omni_teleop_keyboard.py
-```
-
-To publish a velocity from terminal:
-
-```bash
-ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.1, y: 0.1}, angular: {z: 0.3}}"
-```
-To publish a velocity directly on a **Ignition** Topic from terminal:
-
-```bash
-ign topic -t "/model/r1/cmd_vel" -m ignition.msgs.Twist -p "linear: {x: 0.5, y: 0.5}"
-```
 ---
 
 #### 💾 Saving the Map (.pcd)
