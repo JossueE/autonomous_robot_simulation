@@ -69,7 +69,7 @@ Clone the repository inside the `src` directory of your workspace and run the in
 
 ```bash
 cd ~/colcon_ws/src
-git clone https://github.com/JossueE/autonomous_robot_simulation.git
+git clone https://github.com/JossueE/autonomous_robot_simulation.git --recursive
 cd autonomous_robot_simulation
 ./installer.sh
 ```
