@@ -595,6 +595,7 @@ ros2 launch autonomous_robot_simulation one_robot_ign_launch.py
 > - RViz should display the converted LiDAR topic `/lidar/points_pcl` with **Reliability Policy: Best Effort**. The raw Gazebo topic `/lidar/points_ign` may use a Gazebo-scoped frame such as `r1/base_footprint/gpu_lidar`, which can produce TF errors in RViz.
 > - If you change the **LiDAR** or **IMU** topic names, update your RViz displays (reselect topics) so they match the new names.
 
+
 ### 🕹️ Teleoperating the Robot
 
 To teleoperate both the **_differential_** and **_omnidirectional_** mobile robot, use the package node:

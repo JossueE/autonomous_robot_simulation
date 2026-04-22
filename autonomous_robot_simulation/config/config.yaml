@@ -1,0 +1,33 @@
+one_robot_ign_launch:
+  ros__parameters:
+    simulation:
+      robot_model: sensors_diffbot
+      robot_ns: r1
+      pose: ['0.1', '0.0', '0.0', '0.0']
+      robot_base_color: [0.0, 0.0, 1.0, 0.95]
+      world_file: depot.sdf
+
+    lidar:
+      lidar_frequency: 10.0
+      period: 0.1
+      lidar_out_topic: /lidar/points
+      lidar_frame_id: lidar_link
+      horizontal_samples: 360
+      horizontal_resolution: 1
+      horizontal_min_angle: -3.14159
+      horizontal_max_angle: 3.14159
+      vertical_samples: 32
+      vertical_resolution: 1
+      vertical_min_angle: -0.78539
+      vertical_max_angle: 0.78539
+      min_distance: 0.2
+      max_distance: 100.0
+      resolution: 0.017453
+
+    imu:
+      imu_frequency: 50.0
+      imu_out_topic: /imu/data
+
+pcd_to_ros:
+  ros__parameters:
+    map_file_path: package://fast_lio/PCD/test.pcd
