@@ -488,6 +488,10 @@ private:
 
     RobotState x0;
     if (!lookupCurrentState(x0)) {
+      RCLCPP_DEBUG_THROTTLE(
+          this->get_logger(), *this->get_clock(), 1000,
+          "NMPC waiting for TF/current state: step=%zu path_samples=%zu",
+          step_, reference_.size());
       publishStop();
       return;
     }
@@ -506,9 +510,18 @@ private:
     const std::size_t last_idx = reference_.size() - 1;
     const double dx_goal = x0.x - reference_.x[last_idx];
     const double dy_goal = x0.y - reference_.y[last_idx];
+    const double goal_distance = std::hypot(dx_goal, dy_goal);
 
-    if (std::hypot(dx_goal, dy_goal) < goal_tolerance_) {
-      RCLCPP_INFO(this->get_logger(), "Goal reached");
+    RCLCPP_DEBUG_THROTTLE(
+        this->get_logger(), *this->get_clock(), 1000,
+        "NMPC status: step=%zu progress_s=%.3f goal_dist=%.3f ref_size=%zu costmap=%zux%zu",
+        step_, progress_s_, goal_distance, reference_.size(),
+        occupancy_.width, occupancy_.height);
+
+    if (goal_distance < goal_tolerance_) {
+      RCLCPP_INFO(this->get_logger(),
+                  "Goal reached: goal_dist=%.3f tolerance=%.3f step=%zu ref_size=%zu",
+                  goal_distance, goal_tolerance_, step_, reference_.size());
       publishStop();
       active_ = false;
       return;
@@ -520,6 +533,11 @@ private:
     if (!result.success) {
       RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
                           "NMPC solve failed: %s", result.message.c_str());
+      RCLCPP_DEBUG_THROTTLE(
+          this->get_logger(), *this->get_clock(), 1000,
+          "NMPC solve context: step=%zu progress_s=%.3f goal_dist=%.3f obstacles=%zu data_time=%.6f solver_time=%.6f",
+          step_, progress_s_, goal_distance, result.voxel_obstacles.size(),
+          result.data_time, result.solver_time);
       publishStop();
       return;
     }
@@ -527,6 +545,10 @@ private:
     if (result.vr_horizon.size() < 2 || result.vl_horizon.size() < 2) {
       RCLCPP_WARN_THROTTLE(this->get_logger(), *this->get_clock(), 1000,
                           "NMPC returned invalid control horizon");
+      RCLCPP_DEBUG_THROTTLE(
+          this->get_logger(), *this->get_clock(), 1000,
+          "NMPC invalid horizon sizes: vr=%zu vl=%zu step=%zu",
+          result.vr_horizon.size(), result.vl_horizon.size(), step_);
       publishStop();
       return;
     }
