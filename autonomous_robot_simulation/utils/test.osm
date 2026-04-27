@@ -686,9 +686,9 @@
     <tag k="local_y" v="1.3092"/>
     <tag k="ele" v="-0.0717"/>
   </node>
-  <node id="1179" lat="48.74499846613" lon="7.6396388182">
-    <tag k="local_x" v="-5.9948"/>
-    <tag k="local_y" v="1.7033"/>
+  <node id="1179" lat="48.74499711237" lon="7.63963670001">
+    <tag k="local_x" v="-6.1532"/>
+    <tag k="local_y" v="1.5556"/>
     <tag k="ele" v="-0.0717"/>
   </node>
   <node id="1183" lat="48.74503668869" lon="7.63964329567">
@@ -1156,9 +1156,9 @@
     <tag k="local_y" v="2.4021"/>
     <tag k="ele" v="-0.0681"/>
   </node>
-  <node id="1784" lat="48.74500447626" lon="7.63964000947">
-    <tag k="local_x" v="-5.8953"/>
-    <tag k="local_y" v="2.3698"/>
+  <node id="1784" lat="48.74500178844" lon="7.63963904275">
+    <tag k="local_x" v="-5.9717"/>
+    <tag k="local_y" v="2.0723"/>
     <tag k="ele" v="-0.0681"/>
   </node>
   <way id="1185">
