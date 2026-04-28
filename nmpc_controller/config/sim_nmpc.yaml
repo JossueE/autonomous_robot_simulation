@@ -8,7 +8,7 @@ nmpc_controller_node:
     lambda_1: 2.5
     lambda_theta: 0.9
     lambda_v: 0.05
-    d_safe: 0.1
+    d_safe: 0.2
     voxel_size: 0.5
     max_range: 3.5
     max_obstacles: 20
