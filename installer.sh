@@ -71,8 +71,8 @@ casadi_installed() {
 update_bundled_sources() {
   log "Verificando fuentes incluidas en el bundle"
 
-  if [[ -d "${FAST_LIO_DIR}/.git" ]]; then
-    run git -C "${FAST_LIO_DIR}" submodule update --init --recursive
+  if [[ -d "${BUNDLE_DIR}/.git" ]]; then
+    run git -C "${BUNDLE_DIR}" submodule update --init --recursive -- fast_lio_ros2/include/ikd-Tree
   fi
 
   [[ -f "${FAST_LIO_DIR}/include/ikd-Tree/ikd_Tree.h" ]] || die "Falta include/ikd-Tree/ikd_Tree.h. Inicializa los submodules de fast_lio_ros2."
