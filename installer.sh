@@ -71,7 +71,9 @@ casadi_installed() {
 update_bundled_sources() {
   log "Verificando fuentes incluidas en el bundle"
 
-  if [[ -d "${FAST_LIO_DIR}/.git" ]]; then
+  log "FAST_LIO_DIR: ${FAST_LIO_DIR}"
+
+  if [[ ! -d "${FAST_LIO_DIR}/.git" ]]; then
     run git -C "${FAST_LIO_DIR}" submodule update --init --recursive
   fi
 
@@ -201,7 +203,7 @@ install_rosdeps_for_bundle() {
 
   run rosdep install \
     --rosdistro "${ROS_DISTRO}" \
-    --from-paths "${SIM_PACKAGE_DIR}" "${FAST_LIO_DIR}" "${NDT_OMP_DIR}" "${LIDAR_LOCALIZATION_DIR}" "${PATH_PLANNING_DIR}" "${NMPC_CONTROLLER_DIR}" \
+    --from-paths "${SIM_PACKAGE_DIR}" "${NDT_OMP_DIR}" "${LIDAR_LOCALIZATION_DIR}" "${PATH_PLANNING_DIR}" "${NMPC_CONTROLLER_DIR}" \
     --ignore-src \
     -y
 }
@@ -212,9 +214,11 @@ build_workspace_packages() {
   source_setup "/opt/ros/${ROS_DISTRO}/setup.bash"
 
   (
+    warn "To build ndt_omp_ros2, it is necessary to use rmw_fastrtps_cpp middleware implementation."
     cd "${WORKSPACE_DIR}"
-    run colcon build --packages-select ndt_omp_ros2 --cmake-args -DCMAKE_BUILD_TYPE=Release
+    run colcon build --packages-select ndt_omp_ros2 --cmake-clean-cache --cmake-args -DCMAKE_BUILD_TYPE=Release
   )
+  # Could not find ROS middleware implementation 'rmw_cyclonedds_cpp'.  Choose one of the following: rmw_fastrtps_cpp
 
   source_setup "${WORKSPACE_DIR}/install/setup.bash"
 
@@ -228,14 +232,14 @@ build_workspace_packages() {
   (
     cd "${WORKSPACE_DIR}"
     run colcon build --packages-select lidar_localization --symlink-install --cmake-clean-cache --cmake-args -DCMAKE_BUILD_TYPE=Release
-  )
+  ) # Depende de compilacion de ndt_omp_ros2
 
   source_setup "${WORKSPACE_DIR}/install/setup.bash"
 
-  (
-    cd "${WORKSPACE_DIR}"
-    run colcon build --packages-select fast_lio --symlink-install --cmake-clean-cache --cmake-args -DCMAKE_BUILD_TYPE=Release
-  )
+  # (
+  #   cd "${WORKSPACE_DIR}"
+  #   run colcon build --packages-select fast_lio --symlink-install --cmake-clean-cache --cmake-args -DCMAKE_BUILD_TYPE=Release
+  # )
 
   source_setup "${WORKSPACE_DIR}/install/setup.bash"
 
@@ -262,7 +266,7 @@ validate_installation() {
   run ros2 pkg prefix ndt_omp_ros2
   run ros2 pkg prefix autonomous_robot_simulation
   run ros2 pkg prefix lidar_localization
-  run ros2 pkg prefix fast_lio
+  # run ros2 pkg prefix fast_lio
   run ros2 pkg prefix path_planning_dynamic
   run ros2 pkg prefix nmpc_controller
   casadi_installed || die "CasADi no está disponible para nmpc_controller"
@@ -272,14 +276,14 @@ validate_installation() {
   [[ -f "${depot_dir}/model.sdf" ]] || die "Falta ${depot_dir}/model.sdf"
   [[ -f "${depot_dir}/meshes/Depot.dae" ]] || die "Falta ${depot_dir}/meshes/Depot.dae"
   [[ -f "${WORKSPACE_DIR}/install/lidar_localization/share/lidar_localization/launch/lidar_localization_launch.py" ]] || die "Falta lidar_localization_launch.py instalado"
-  [[ -f "${WORKSPACE_DIR}/install/fast_lio/share/fast_lio/config/simulated.yaml" ]] || die "Falta fast_lio/config/simulated.yaml instalado"
+  # [[ -f "${WORKSPACE_DIR}/install/fast_lio/share/fast_lio/config/simulated.yaml" ]] || die "Falta fast_lio/config/simulated.yaml instalado"
   [[ -f "${WORKSPACE_DIR}/install/path_planning_dynamic/share/path_planning_dynamic/config/params.yaml" ]] || die "Falta path_planning_dynamic/config/params.yaml instalado"
   [[ -f "${WORKSPACE_DIR}/install/nmpc_controller/share/nmpc_controller/launch/sim_nmpc.launch.py" ]] || die "Falta nmpc_controller/launch/sim_nmpc.launch.py instalado"
   [[ -f "${WORKSPACE_DIR}/install/nmpc_controller/share/nmpc_controller/config/sim_nmpc.yaml" ]] || die "Falta nmpc_controller/config/sim_nmpc.yaml instalado"
 
-  if ! nm -D "/opt/ros/${ROS_DISTRO}/lib/libfastcdr.so.2" | c++filt | grep -q 'eprosima::fastcdr::Cdr::serialize(unsigned int)'; then
-    warn "libfastcdr.so.2 no exporta Cdr::serialize(unsigned int). Si display_map_launch.py falla con undefined symbol, actualiza ros-${ROS_DISTRO}-fastcdr/fastrtps."
-  fi
+  # if ! nm -D "/opt/ros/${ROS_DISTRO}/lib/libfastcdr.so.2" | c++filt | grep -q 'eprosima::fastcdr::Cdr::serialize(unsigned int)'; then
+  #   warn "libfastcdr.so.2 no exporta Cdr::serialize(unsigned int). Si display_map_launch.py falla con undefined symbol, actualiza ros-${ROS_DISTRO}-fastcdr/fastrtps."
+  # fi
 }
 
 print_next_steps() {
@@ -322,25 +326,25 @@ main() {
   [[ -d "${WORKSPACE_DIR}" ]] || die "No existe el workspace ${WORKSPACE_DIR}"
   [[ -d "${SRC_DIR}" ]] || die "No existe ${SRC_DIR}"
 
-  verify_bundle_layout
+  # verify_bundle_layout
 
-  require_command sudo
-  require_command apt-get
-  require_command git
-  require_command cmake
-  require_command make
-  require_command colcon
-  require_command ldconfig
-  require_command rosdep
-  require_command pkg-config
-  require_command nm
-  require_command c++filt
+  # require_command sudo
+  # require_command apt-get
+  # require_command git
+  # require_command cmake
+  # require_command make
+  # require_command colcon
+  # require_command ldconfig
+  # require_command rosdep
+  # require_command pkg-config
+  # require_command nm
+  # require_command c++filt
 
-  install_apt_dependencies
-  init_rosdep_if_needed
-  update_bundled_sources
-  install_casadi_if_needed
-  install_rosdeps_for_bundle
+  # install_apt_dependencies
+  # init_rosdep_if_needed
+  # update_bundled_sources #Fast_lio submoodule (clonar el sub.modulo esta mal y se necesita el repo)
+  # install_casadi_if_needed
+  # install_rosdeps_for_bundle
   build_workspace_packages
   validate_installation
   print_next_steps

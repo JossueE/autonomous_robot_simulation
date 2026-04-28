@@ -30,10 +30,10 @@
   <build_export_depend>eigen</build_export_depend>
 
   <exec_depend>ament_index_python</exec_depend>
-  <exec_depend>fast_lio</exec_depend>
+  <!-- <exec_depend>fast_lio</exec_depend> -->
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
-  <exec_depend>pyyaml</exec_depend>
+  <!-- <exec_depend>pyyaml</exec_depend> -->
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
