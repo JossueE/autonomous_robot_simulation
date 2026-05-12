@@ -2,7 +2,13 @@
 	path = fast_lio_ros2/include/ikd-Tree
 	url = https://github.com/hku-mars/ikd-Tree.git
 	branch = fast_lio
+
 [submodule "path_planning_dynamic"]
 	path = path_planning_dynamic
 	url = git@github.com:JossueE/path_planning_dynamic.git
+	branch = main
+
+[submodule "nmpc_controller"]
+	path = nmpc_controller
+	url = git@github.com:JossueE/nmpc_controller.git
 	branch = main
