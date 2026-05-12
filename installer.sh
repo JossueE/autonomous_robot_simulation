@@ -72,9 +72,14 @@ update_bundled_sources() {
   log "Verificando fuentes incluidas en el bundle"
 
   if [[ -d "${BUNDLE_DIR}/.git" ]]; then
-    run git -C "${BUNDLE_DIR}" submodule update --init --recursive -- fast_lio_ros2/include/ikd-Tree
+    run git -C "${BUNDLE_DIR}" submodule update --init --recursive -- \
+      fast_lio_ros2/include/ikd-Tree \
+      path_planning_dynamic \
+      nmpc_controller
   fi
 
+  [[ -d "${PATH_PLANNING_DIR}" ]] || die "Falta path_planning_dynamic. Inicializa los submodules del repositorio."
+  [[ -d "${NMPC_CONTROLLER_DIR}" ]] || die "Falta nmpc_controller. Inicializa los submodules del repositorio."
   [[ -f "${FAST_LIO_DIR}/include/ikd-Tree/ikd_Tree.h" ]] || die "Falta include/ikd-Tree/ikd_Tree.h. Inicializa los submodules de fast_lio_ros2."
 }
 
@@ -323,8 +328,6 @@ main() {
   [[ -d "${WORKSPACE_DIR}" ]] || die "No existe el workspace ${WORKSPACE_DIR}"
   [[ -d "${SRC_DIR}" ]] || die "No existe ${SRC_DIR}"
 
-  verify_bundle_layout
-
   require_command sudo
   require_command apt-get
   require_command git
@@ -337,9 +340,10 @@ main() {
   require_command nm
   require_command c++filt
 
+  update_bundled_sources
+  verify_bundle_layout
   install_apt_dependencies
   init_rosdep_if_needed
-  update_bundled_sources
   install_casadi_if_needed
   install_rosdeps_for_bundle
   build_workspace_packages
