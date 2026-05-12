@@ -1,11 +1,11 @@
-.vscode
+.vscode/
+__pycache__/
+*.pyc
 .codex
-build
-install
-log
-Log/*.png
-Log/*.txt
-Log/*.csv
-Log/*.pdf
-.vscode/c_cpp_properties.json
-.vscode/settings.json
+.venv/
+venv/
+build/
+install/
+log/
+Log/
+#find . -name "__pycache__" -type d -print0 | xargs -0 rm -rf

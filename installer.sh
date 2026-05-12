@@ -71,8 +71,8 @@ casadi_installed() {
 update_bundled_sources() {
   log "Verificando fuentes incluidas en el bundle"
 
-  if [[ -d "${FAST_LIO_DIR}/.git" ]]; then
-    run git -C "${FAST_LIO_DIR}" submodule update --init --recursive
+  if [[ -d "${BUNDLE_DIR}/.git" ]]; then
+    run git -C "${BUNDLE_DIR}" submodule update --init --recursive -- fast_lio_ros2/include/ikd-Tree
   fi
 
   [[ -f "${FAST_LIO_DIR}/include/ikd-Tree/ikd_Tree.h" ]] || die "Falta include/ikd-Tree/ikd_Tree.h. Inicializa los submodules de fast_lio_ros2."
@@ -212,8 +212,9 @@ build_workspace_packages() {
   source_setup "/opt/ros/${ROS_DISTRO}/setup.bash"
 
   (
+    warn "To build ndt_omp_ros2, it is necessary to use rmw_fastrtps_cpp middleware implementation."
     cd "${WORKSPACE_DIR}"
-    run colcon build --packages-select ndt_omp_ros2 --cmake-args -DCMAKE_BUILD_TYPE=Release
+    run colcon build --packages-select ndt_omp_ros2 --cmake-clean-cache --cmake-args -DCMAKE_BUILD_TYPE=Release
   )
 
   source_setup "${WORKSPACE_DIR}/install/setup.bash"
@@ -277,9 +278,9 @@ validate_installation() {
   [[ -f "${WORKSPACE_DIR}/install/nmpc_controller/share/nmpc_controller/launch/sim_nmpc.launch.py" ]] || die "Falta nmpc_controller/launch/sim_nmpc.launch.py instalado"
   [[ -f "${WORKSPACE_DIR}/install/nmpc_controller/share/nmpc_controller/config/sim_nmpc.yaml" ]] || die "Falta nmpc_controller/config/sim_nmpc.yaml instalado"
 
-  if ! nm -D "/opt/ros/${ROS_DISTRO}/lib/libfastcdr.so.2" | c++filt | grep -q 'eprosima::fastcdr::Cdr::serialize(unsigned int)'; then
-    warn "libfastcdr.so.2 no exporta Cdr::serialize(unsigned int). Si display_map_launch.py falla con undefined symbol, actualiza ros-${ROS_DISTRO}-fastcdr/fastrtps."
-  fi
+  #if ! nm -D "/opt/ros/${ROS_DISTRO}/lib/libfastcdr.so.2" | c++filt | grep -q 'eprosima::fastcdr::Cdr::serialize(unsigned int)'; then
+    #warn "libfastcdr.so.2 no exporta Cdr::serialize(unsigned int). Si display_map_launch.py falla con undefined symbol, actualiza ros-${ROS_DISTRO}-fastcdr/fastrtps."
+  #fi
 }
 
 print_next_steps() {
