@@ -69,7 +69,7 @@ Clone the repository inside the `src` directory of your workspace and run the in
 
 ```bash
 cd ~/colcon_ws/src
-git clone https://github.com/JossueE/autonomous_robot_simulation.git 
+git clone --recurse-submodules https://github.com/JossueE/autonomous_robot_simulation.git
 cd autonomous_robot_simulation
 ./installer.sh
 ```
@@ -88,7 +88,7 @@ The installer does the following:
 - Installs `PCL` and `Eigen` using the system packages expected by this workspace: `libpcl-dev`, `libeigen3-dev`, `ros-jazzy-pcl-ros`, `ros-jazzy-pcl-conversions`, `ros-jazzy-pcl-msgs`, and `ros-jazzy-tf2-eigen`.
 - Installs CasADi for `nmpc_controller`.
 - Runs `rosdep` for the bundled packages.
-- Initializes the bundled `fast_lio` submodule `ikd-Tree` when needed.
+- Initializes the required submodules when needed: `fast_lio_ros2/include/ikd-Tree`, `path_planning_dynamic`, and `nmpc_controller`.
 - Builds `ndt_omp_ros2`, `autonomous_robot_simulation`, `lidar_localization`, `fast_lio`, `path_planning_dynamic`, and `nmpc_controller`.
 - Validates the resulting installation and prints the next launch commands.
 
@@ -337,7 +337,7 @@ lidar_localization:
 
 ```
 ### 🛣️ Configure Path Planning
-`path_planning_dynamic` is also bundled in this repository.
+`path_planning_dynamic` is included in this workspace as a git submodule.
 Configure it directly in `path_planning_dynamic/config/params.yaml`.
 Remember to set all parameters according to your robot; the default values are tuned to work safely with `sensors_diffbot`.
 Also, make sure `map_path` points to your `.osm` map file.
@@ -527,9 +527,13 @@ ros2 launch path_planning_dynamic planning.launch.py
 ```
 ### NMPC Control
 
-colcon build --base-paths src/autonomous_robot_simulation/nmpc_controller --packages-select nmpc_controller
+Once path planning is publishing `/occupancy_grid_obstacles`, launch the NMPC controller from the workspace:
 
+```bash
+cd ~/colcon_ws
+colcon build --symlink-install --packages-select nmpc_controller --cmake-args -DCMAKE_BUILD_TYPE=Release
 source ~/colcon_ws/install/setup.bash
 ros2 launch nmpc_controller sim_nmpc.launch.py
 
 ros2 launch nmpc_controller sim_nmpc.launch.py costmap_topic:=/occupancy_grid_obstacles
+```
